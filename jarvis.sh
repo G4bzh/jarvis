@@ -73,7 +73,7 @@ case "$OSTYPE" in
                 jv_arch="$(uname -m)"
                 jv_os_name="$(cat /etc/*release | grep ^ID= | cut -f2 -d=)"
                 jv_os_version="$(cat /etc/*release | grep ^VERSION_ID= | cut -f2 -d= | tr -d '"')"
-                dependencies+=(alsamixer aplay arecord whiptail libsox-fmt-mp3)
+                dependencies+=(alsa-utils whiptail libsox-fmt-mp3)
             	jv_cache_folder="/dev/shm"
                 ;;
     darwin*)    platform="osx"
@@ -154,7 +154,7 @@ while getopts ":$flags" o; do
                 exit 1
             fi
             jv_api=true;;
-        u)  configure "load" #498 
+        u)  configure "load" #498
             jv_check_updates "./" true # force udpate
             jv_plugins_check_updates true # force udpate
             touch config/last_update_check
@@ -235,7 +235,7 @@ if [ "$jv_api" == false ]; then
         esac
         exit
     fi
-    
+
     # check for updates
     if [ $check_updates != false ] && [ $no_menu = false ]; then
         if [ "$(find config/last_update_check -mtime -$check_updates 2>/dev/null | wc -l)" -eq 0 ]; then
@@ -248,7 +248,7 @@ if [ "$jv_api" == false ]; then
             fi
         fi
     fi
-    
+
     # main menu
     if ! $no_menu; then
         source utils/menu.sh
@@ -322,7 +322,7 @@ jv_plugins_order_rebuild # why here? in case plugin is manually added/delete?
 $jv_api || jv_hook "program_startup" # don't trigger program_* from api calls
 
 # Public: handle an order and execute corresponding command
-# 
+#
 # $1 - order to recognize
 #
 # Usage
@@ -332,17 +332,17 @@ jv_handle_order() {
     local order=$1
     local sanitized="$(jv_sanitize "$order")"
 	local check_indented=false
-    
+
     if [ "$order" = "?" ]; then
         jv_display_commands
         return
     fi
-    
+
     if ! $jv_possible_answers; then
         #jv_debug "no nested answers, resetting commands..."
         commands="$(jv_get_commands)"
     fi
-    
+
     while read line; do
         if $check_indented; then
             #jv_debug "checking if possible answers in: $line"
@@ -403,30 +403,30 @@ if [ "$just_execute" = false ]; then
     trap "jv_exit" INT TERM
     trap "jv_pause_resume" $jv_sig_pause
     trap ":" $jv_sig_listen
-    
+
     # save pid in lockfile for proper kill
     echo $$ > $lockfile
-    
+
     # start say service
     if ! $jv_api; then
         [ -p $jv_say_queue ] || mkfifo $jv_say_queue # create pipe if not exists
         source utils/say.sh &
     fi
-    
+
     # welcome phrase
     [ $just_listen = false ] && [ ! -z "$phrase_welcome" ] && say "$phrase_welcome"
-    
+
     # Display available commands to the user
     if $show_commands; then
         jv_display_commands
     else
         jv_debug "Use \"?\" to display possible commands (in keyboard mode)"
     fi
-    
+
     bypass=$just_listen
 else # just execute an order
     order="$just_execute"
-    
+
     if [ -f $jv_cache_folder/jarvis-possible-answers ]; then
         # there are possible answers from previous json conversation (nested commmands)
         commands="$(cat $jv_cache_folder/jarvis-possible-answers)"
@@ -452,13 +452,13 @@ while true; do
     		fi
     		! $bypass && echo -e "$_pink$trigger$_reset: Waiting to hear '$trigger'"
     		printf "$_cyan$username$_reset: "
-            
+
             $quiet || ( $bypass && jv_play sounds/triggered.wav || jv_play sounds/listening.wav )
-            
+
             nb_failed=0
             while true; do
     			#$quiet || jv_play beep-high.wav
-                
+
                 $verbose && jv_debug "(listening...)"
                 > $forder # empty $forder
                 if $bypass; then
@@ -469,7 +469,7 @@ while true; do
                 retcode=$?
                 #jv_debug "retcode=$retcode"
                 (( $retcode )) && error=true || error=false
-                
+
                 # if there was no error doing speech to text
                 if ! $error; then
                     # retrieve transcribed speech
@@ -480,14 +480,14 @@ while true; do
                         error=true
                     fi
                 fi
-                
+
                 if $jv_is_paused; then
                     echo "paused"
                     $verbose && jv_debug "to resume, run: jarvis and select Resume"
                     wait # until signal
                     continue 2
                 fi
-                
+
     			if $error; then
                     finish=false
                     if [ $retcode -eq 124 ]; then # timeout
@@ -513,7 +513,7 @@ while true; do
                     fi
                     continue
                 fi
-                
+
     			if $bypass; then
                     echo "$order" # printf fails when order has %
                     break
@@ -525,7 +525,7 @@ while true; do
                     [ -n "$phrase_triggered" ] && say "$phrase_triggered"
                     continue 2
                 fi
-    			
+
     			#$verbose && jv_play beep-error.wav
     		done
     		#echo # new line

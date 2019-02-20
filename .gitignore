@@ -9,6 +9,10 @@ jarvis.log
 
 config/
 
+stt_engines/snips/assistant/*
+
+!stt_engines/snips/assistant/.gitkeep
+
 stt_engines/snowboy/_snowboydetect.so
 
 stt_engines/snowboy/resources/
