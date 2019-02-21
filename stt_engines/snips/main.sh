@@ -10,8 +10,9 @@ _snips_transcribe () {
     fi
 
 
-    snips-asr -a stt_engines/snips/assistant file $audiofile 2>/dev/null  | cut -d ':' -f 4 | grep -o '".*"' | sed 's/"//g' > $forder
-    $verbose && jv_debug "DEBUG: $forder"
+    snips_order=`snips-asr -a stt_engines/snips/assistant file $audiofile 2>/dev/null  | cut -d ':' -f 4 | grep -o '".*"' | sed 's/"//g'`
+    $verbose && jv_debug "DEBUG: $snips_order"
+    echo $snips_order > $forder
 }
 
 snips_STT () { # STT () {} Transcribes audio file $1 and writes corresponding text in $forder
