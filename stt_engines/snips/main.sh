@@ -10,7 +10,9 @@ _snips_transcribe () {
     fi
 
 
-    snips_order=`snips-asr -a stt_engines/snips/assistant file $audiofile 2>/dev/null  | cut -d ':' -f 4 | grep -o '".*"' | sed 's/"//g'`
+    snips_ret=`snips-asr -a stt_engines/snips/assistant file $audiofile 2>/dev/null`
+    snips_order=`echo $snips_ret  | cut -d ':' -f 4 | grep -o '".*"' | sed 's/"//g'`
+    $verbose && jv_debug "DEBUG: $snips_ret"
     $verbose && jv_debug "DEBUG: $snips_order"
     echo $snips_order > $forder
 }
